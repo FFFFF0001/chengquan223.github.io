@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+    
+    <entry>
+      <title><![CDATA[canvas动画—圆形扩散、运动轨迹]]></title>
+      <url>%2F2017%2F03%2F02%2Fcanvas-flashMarker%2F</url>
+      <content type="text"><![CDATA[介绍在ECharts中看到过这种圆形扩散效果，类似css3，刚好项目中想把它用上，but我又不想引入整个echart.js文件，更重要的是想弄明白它的原理，所以自己动手。在这篇文章中我们就来分析实现这种效果的两种方法，先上效果图： 实现原理通过不断的改变圆的半径大小，不断重叠达到运动的效果，在运动的过程中，设置当前canvas的透明度context.globalAlpha=0.95，使得canvas上的圆逐渐透明直至为0，从而实现这种扩散、渐变的效果。 实现方法一1. 关键技术点context.globalAlpha = 0.95; //设置主canvas的绘制透明度。创建临时canvas来缓存主canas的历史图像，再叠加到主canvas上。 2. 绘制过程首先，我们先来写一个绘制圆的方法： 123456789101112131415//画圆var drawCircle = function() &#123; context.beginPath(); context.arc(150, 100, radius, 0, Math.PI * 2); context.closePath(); context.lineWidth = 2; //线条宽度 context.strokeStyle = 'rgba(250,250,50,1)'; //颜色 context.stroke(); radius += 0.5; //每一帧半径增加0.5 //半径radius大于30时，重置为0 if (radius &gt; 30) &#123; radius = 0; &#125;&#125;; 然后，我们创建一个临时canvas用来缓存主canvas上的历史图像，设置主canvas的透明度context.globalAlpha=0.95(关键一步)，在每次调用drawCircle方法绘制一个新圆之前都把主canvas上的图像，也就是之前的图像给绘制到临时的canvas中，等drawCircle方法绘制完新圆后，再把临时canvas的图像绘制回主canvas中。 核心代码如下： 12345678910111213141516171819202122232425//创建一个临时canvas来缓存主canvas的历史图像var backCanvas = document.createElement('canvas'), backCtx = backCanvas.getContext('2d'); backCanvas.width = width; backCanvas.height = height; //设置主canvas的绘制透明度 context.globalAlpha = 0.95; //显示即将绘制的图像，忽略临时canvas中已存在的图像 backCtx.globalCompositeOperation = 'copy';var render = function() &#123; //1.先将主canvas的图像缓存到临时canvas中 backCtx.drawImage(canvas, 0, 0, width, height); //2.清除主canvas上的图像 context.clearRect(0, 0, width, height); //3.在主canvas上画新圆 drawCircle(); //4.等新圆画完后，再把临时canvas的图像绘制回主canvas中 context.drawImage(backCanvas, 0, 0, width, height);&#125;; 实现方法二与上一种方法相比，这种方法更加简单，同样是用到了透明度逐渐减小直到为0的原理，不同的是这里并没有创建临时canvas，而是运用了context.globalCompositeOperation属性值source-over和destination-in来配合使用，查看globalCompositeOperation属性介绍核心代码如下： 12345678910111213141516171819var render = function() &#123; //默认值为source-over var prev = context.globalCompositeOperation; //只显示canvas上原图像的重叠部分 context.globalCompositeOperation = 'destination-in'; //设置主canvas的绘制透明度 context.globalAlpha = 0.95; //这一步目的是将canvas上的图像变的透明 context.fillRect(0, 0, width, height); //在原图像上重叠新图像 context.globalCompositeOperation = prev; //在主canvas上画新圆 drawCircle();&#125;; 地图上的应用这里我采用的是第二种方式，将扩散、渐变效果运用到了百度地图上，感觉还比较炫，查看更多demo 圆形扩散动画运动轨迹动画 总结方法一、二都能实现同样的效果，如果动画绘制、操作canvas比较频繁，建议采用第一种方式，用临时canvas来缓存历史图像，效率更高。]]></content>
+    </entry>
+
+    
+    <entry>
+      <title><![CDATA[Hexo+NexT搭建个人博客]]></title>
+      <url>%2F2017%2F03%2F01%2FFirstArticle%2F</url>
+      <content type="text"><![CDATA[安装Hexo前提是必须先安装好 Node.js（这里就不作介绍了）1npm install hexo -g 初始化如果指定，便会在这个目录下新建一个名为的文件夹；否则将在当前目录下初始化1hexo init &lt;folder&gt; 新建文章1hexo new "FirstArticle" 生成静态页面指public目录1hexo generate （或简写为hexo g） 本地启动服务器服务器会跑在http://localhost:port （port 预设为 4000，可在 _config.yml 设定）1hexo server （或简写为hexo s） 关联Github我们需要修改站点配置文件_config.yml，如下格式：1234deploy: type: git repository: https://github.com/chengquan223/chengquan223.github.io branch: master 安装插件hexo-deployer-git，将网站部署到Github1npm install hexo-deployer-git --save 执行命令进行部署,浏览器中输入http://chengquan223.github.io 即可，（github账户名称修改为你的）1hexo deploy 每次部署的步骤。可按照以下三步来进行123hexo cleanhexo generatehexo deploy 简写成12hexo cleanhexo g -d 博客主题主题列表NexT主题使用文档]]></content>
+    </entry>
+
+    
+  
+  
+</search>
